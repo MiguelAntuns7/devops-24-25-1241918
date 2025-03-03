@@ -32,6 +32,7 @@ public class Employee {
 	private String firstName;
 	private String lastName;
 	private String description;
+	private Integer jobYears;
 
 	protected Employee() {}
 
@@ -39,6 +40,7 @@ public class Employee {
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.description = description;
+		this.jobYears = jobYears;
 	}
 
 	@Override
@@ -49,13 +51,14 @@ public class Employee {
 		return Objects.equals(id, employee.id) &&
 				Objects.equals(firstName, employee.firstName) &&
 				Objects.equals(lastName, employee.lastName) &&
-				Objects.equals(description, employee.description);
+				Objects.equals(description, employee.description) &&
+				Objects.equals(jobYears, employee.jobYears);
 	}
 
 	@Override
 	public int hashCode() {
 
-		return Objects.hash(id, firstName, lastName, description);
+		return Objects.hash(id, firstName, lastName, description, jobYears);
 	}
 
 	public Long getId() {
@@ -90,14 +93,23 @@ public class Employee {
 		this.description = description;
 	}
 
+	public Integer getJobYears (Integer jobYears) {
+		return jobYears;
+	}
+
+	public void setJobYears (Integer jobYears) {
+		this.jobYears = jobYears;
+	}
+
 	@Override
 	public String toString() {
 		return "Employee{" +
-			"id=" + id +
-			", firstName='" + firstName + '\'' +
-			", lastName='" + lastName + '\'' +
-			", description='" + description + '\'' +
-			'}';
+				"id=" + id +
+				", firstName='" + firstName + '\'' +
+				", lastName='" + lastName + '\'' +
+				", description='" + description + '\'' +
+				", jobYears=" + jobYears + '\'' +
+				'}';
 	}
 }
 // end::code[]
