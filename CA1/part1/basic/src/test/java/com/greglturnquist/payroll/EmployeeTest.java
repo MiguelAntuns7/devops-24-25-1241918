@@ -289,11 +289,19 @@ class EmployeeTest {
     }
 
     @Test
-    void testToString() {
-
+    public void testToString() {
+        // Arrange
         Employee employee = new Employee("Miguel", "Antunes", "Employee", "DevOps Engineer", 5);
 
-        assertEquals("Employee{id=null, firstName='Miguel', lastName='Antunes', description='Employee', jobTitle='DevOps Engineer', jobYears='5'}", employee.toString());
-
+        String expected = "Employee{" +
+                "id=" + employee.getId() +
+                ", firstName='" + employee.getFirstName() + '\'' +
+                ", lastName='" + employee.getLastName() + '\'' +
+                ", description='" + employee.getDescription() + '\'' +
+                ", jobTitle='" + employee.getJobTitle() + '\'' +
+                ", jobYears='" + employee.getJobYears() + '\'' +
+                '}';
+        // Act and Assert
+        assertEquals(expected, employee.toString());
     }
 }
