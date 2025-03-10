@@ -32,15 +32,38 @@ public class Employee {
 	private String firstName;
 	private String lastName;
 	private String description;
+	private String jobTitle;
 	private Integer jobYears;
 
 	protected Employee() {}
 
-	public Employee(String firstName, String lastName, String description, Integer jobYears) {
-		this.firstName = firstName;
-		this.lastName = lastName;
-		this.description = description;
-		this.jobYears = jobYears;
+	public Employee(String firstName, String lastName, String description, String jobTitle, Integer jobYears) {
+
+		validateParameters(firstName, lastName, description, jobTitle, jobYears);
+
+		setFirstName(firstName);
+		setLastName(lastName);
+		setDescription(description);
+		setJobTitle(jobTitle);
+		setJobYears(jobYears);
+	}
+
+	public void validateParameters (String firstName, String lastName, String description, String jobTitle, Integer jobYears) {
+
+		if (firstName == null || firstName.isEmpty())
+			throw new IllegalArgumentException("First Name field must not be empty.");
+
+		if (lastName == null || lastName.isEmpty())
+			throw new IllegalArgumentException("Last Name field must not be empty.");
+
+		if (description == null || description.isEmpty())
+			throw new IllegalArgumentException("Description field must not be empty.");
+
+		if (jobTitle == null || jobTitle.isEmpty())
+			throw new IllegalArgumentException("Job Title field must not be empty.");
+
+		if (jobYears == null || jobYears < 0)
+			throw new IllegalArgumentException("Job Years field must be a positive value.");
 	}
 
 	@Override
@@ -52,13 +75,14 @@ public class Employee {
 				Objects.equals(firstName, employee.firstName) &&
 				Objects.equals(lastName, employee.lastName) &&
 				Objects.equals(description, employee.description) &&
+				Objects.equals(jobTitle, employee.jobTitle) &&
 				Objects.equals(jobYears, employee.jobYears);
 	}
 
 	@Override
 	public int hashCode() {
 
-		return Objects.hash(id, firstName, lastName, description, jobYears);
+		return Objects.hash(id, firstName, lastName, description, jobTitle, jobYears);
 	}
 
 	public Long getId() {
@@ -74,6 +98,9 @@ public class Employee {
 	}
 
 	public void setFirstName(String firstName) {
+		if (firstName == null || firstName.isEmpty())
+			throw new IllegalArgumentException("First Name field must not be empty.");
+
 		this.firstName = firstName;
 	}
 
@@ -82,6 +109,9 @@ public class Employee {
 	}
 
 	public void setLastName(String lastName) {
+		if (lastName == null || lastName.isEmpty())
+			throw new IllegalArgumentException("Last Name field must not be empty.");
+
 		this.lastName = lastName;
 	}
 
@@ -90,14 +120,31 @@ public class Employee {
 	}
 
 	public void setDescription(String description) {
+		if (description == null || description.isEmpty())
+			throw new IllegalArgumentException("Description field must not be empty.");
+
 		this.description = description;
 	}
 
-	public Integer getJobYears (Integer jobYears) {
+	public String getJobTitle () {
+		return jobTitle;
+	}
+
+	public void setJobTitle (String jobTitle) {
+		if (jobTitle == null || jobTitle.isEmpty())
+			throw new IllegalArgumentException("Job Title field must not be empty.");
+
+		this.jobTitle = jobTitle;
+	}
+
+	public Integer getJobYears () {
 		return jobYears;
 	}
 
 	public void setJobYears (Integer jobYears) {
+		if (jobYears == null || jobYears < 0)
+			throw new IllegalArgumentException("Job Years field must be a positive value.");
+
 		this.jobYears = jobYears;
 	}
 
@@ -108,7 +155,8 @@ public class Employee {
 				", firstName='" + firstName + '\'' +
 				", lastName='" + lastName + '\'' +
 				", description='" + description + '\'' +
-				", jobYears=" + jobYears + '\'' +
+				", jobTitle='" + jobTitle + '\'' +
+				", jobYears='" + jobYears + '\'' +
 				'}';
 	}
 }
