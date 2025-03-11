@@ -14,7 +14,7 @@ class EmployeeTest {
     @Test
     void shouldCreateEmployee() {
         // Act
-        Employee employee = new Employee("Miguel", "Antunes", "Employee", "DevOps Engineer", 0);
+        Employee employee = new Employee("Miguel", "Antunes", "Employee", "DevOps Engineer", 0, "miguel@gmail.com");
 
         //Assert
         assertNotNull(employee);
@@ -22,34 +22,34 @@ class EmployeeTest {
 
     public static Stream<Arguments> provideInvalidFirstName() {
         return Stream.of(
-                Arguments.of(null, "Antunes", "Employee", "DevOps Engineer", 5, "First Name field must not be empty."),
-                Arguments.of("", "Antunes", "Employee", "DevOps Engineer", 5, "First Name field must not be empty.")
+                Arguments.of(null, "Antunes", "Employee", "DevOps Engineer", 5, "miguel@gmail.com", "First Name field must not be empty."),
+                Arguments.of("", "Antunes", "Employee", "DevOps Engineer", 5, "miguel@gmail.com", "First Name field must not be empty.")
         );
     }
 
     @ParameterizedTest
     @MethodSource ("provideInvalidFirstName")
-    void shouldThrowExceptionIfFirstNameIsInvalid(String firstName, String lastName, String description, String jobTitle, Integer jobYears, String expectedMessage) {
+    void shouldThrowExceptionIfFirstNameIsInvalid(String firstName, String lastName, String description, String jobTitle, Integer jobYears, String email, String expectedMessage) {
         // Act + Assert
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            new Employee(firstName, lastName, description, jobTitle, jobYears);
+            new Employee(firstName, lastName, description, jobTitle, jobYears, email);
         });
         assertEquals(expectedMessage, exception.getMessage());
     }
 
     public static Stream<Arguments> provideInvalidLastName() {
         return Stream.of(
-                Arguments.of("Miguel", null, "Employee", "DevOps Engineer", 5, "Last Name field must not be empty."),
-                Arguments.of("Miguel", "", "Employee", "DevOps Engineer", 5, "Last Name field must not be empty.")
+                Arguments.of("Miguel", null, "Employee", "DevOps Engineer", 5, "miguel@gmail.com", "Last Name field must not be empty."),
+                Arguments.of("Miguel", "", "Employee", "DevOps Engineer", 5, "miguel@gmail.com", "Last Name field must not be empty.")
         );
     }
 
     @ParameterizedTest
     @MethodSource ("provideInvalidLastName")
-    void shouldThrowExceptionIfLastNameIsInvalid(String firstName, String lastName, String description, String jobTitle, Integer jobYears, String expectedMessage) {
+    void shouldThrowExceptionIfLastNameIsInvalid(String firstName, String lastName, String description, String jobTitle, Integer jobYears, String email, String expectedMessage) {
         // Act + Assert
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            new Employee(firstName, lastName, description, jobTitle, jobYears);
+            new Employee(firstName, lastName, description, jobTitle, jobYears, email);
         });
         assertEquals(expectedMessage, exception.getMessage());
     }
@@ -57,51 +57,69 @@ class EmployeeTest {
 
     public static Stream<Arguments> provideInvalidDescription() {
         return Stream.of(
-                Arguments.of("Miguel", "Antunes", null, "DevOps Engineer", 5, "Description field must not be empty."),
-                Arguments.of("Miguel", "Antunes", "", "DevOps Engineer", 5, "Description field must not be empty.")
+                Arguments.of("Miguel", "Antunes", null, "DevOps Engineer", 5, "miguel@gmail.com", "Description field must not be empty."),
+                Arguments.of("Miguel", "Antunes", "", "DevOps Engineer", 5, "miguel@gmail.com", "Description field must not be empty.")
         );
     }
 
     @ParameterizedTest
     @MethodSource ("provideInvalidDescription")
-    void shouldThrowExceptionIfDescriptionIsInvalid(String firstName, String lastName, String description, String jobTitle, Integer jobYears, String expectedMessage) {
+    void shouldThrowExceptionIfDescriptionIsInvalid(String firstName, String lastName, String description, String jobTitle, Integer jobYears, String email, String expectedMessage) {
         // Act + Assert
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            new Employee(firstName, lastName, description, jobTitle, jobYears);
+            new Employee(firstName, lastName, description, jobTitle, jobYears, email);
         });
         assertEquals(expectedMessage, exception.getMessage());
     }
 
     public static Stream<Arguments> provideInvalidJobTitle() {
         return Stream.of(
-                Arguments.of("Miguel", "Antunes", "Employee", null, 5, "Job Title field must not be empty."),
-                Arguments.of("Miguel", "Antunes", "Employee", "", 5, "Job Title field must not be empty.")
+                Arguments.of("Miguel", "Antunes", "Employee", null, 5, "miguel@gmail.com", "Job Title field must not be empty."),
+                Arguments.of("Miguel", "Antunes", "Employee", "", 5, "miguel@gmail.com", "Job Title field must not be empty.")
         );
     }
 
     @ParameterizedTest
     @MethodSource ("provideInvalidJobTitle")
-    void shouldThrowExceptionIfJobTitleIsInvalid(String firstName, String lastName, String description, String jobTitle, Integer jobYears, String expectedMessage) {
+    void shouldThrowExceptionIfJobTitleIsInvalid(String firstName, String lastName, String description, String jobTitle, Integer jobYears, String email, String expectedMessage) {
         // Act + Assert
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            new Employee(firstName, lastName, description, jobTitle, jobYears);
+            new Employee(firstName, lastName, description, jobTitle, jobYears, email);
         });
         assertEquals(expectedMessage, exception.getMessage());
     }
 
     public static Stream<Arguments> provideInvalidJobYears() {
         return Stream.of(
-                Arguments.of("Miguel", "Antunes", "Employee", "DevOps Engineer", null, "Job Years field must be a positive value."),
-                Arguments.of("Miguel", "Antunes", "Employee", "DevOps Engineer", -1, "Job Years field must be a positive value.")
+                Arguments.of("Miguel", "Antunes", "Employee", "DevOps Engineer", null, "miguel@gmail.com", "Job Years field must be a positive value."),
+                Arguments.of("Miguel", "Antunes", "Employee", "DevOps Engineer", -1, "miguel@gmail.com", "Job Years field must be a positive value.")
         );
     }
 
     @ParameterizedTest
     @MethodSource ("provideInvalidJobYears")
-    void shouldThrowExceptionIfJobYearsIsInvalid(String firstName, String lastName, String description, String jobTitle, Integer jobYears, String expectedMessage) {
+    void shouldThrowExceptionIfJobYearsIsInvalid(String firstName, String lastName, String description, String jobTitle, Integer jobYears, String email, String expectedMessage) {
         // Act + Assert
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            new Employee(firstName, lastName, description, jobTitle, jobYears);
+            new Employee(firstName, lastName, description, jobTitle, jobYears, email);
+        });
+        assertEquals(expectedMessage, exception.getMessage());
+    }
+
+    public static Stream<Arguments> provideInvalidEmail() {
+        return Stream.of(
+                Arguments.of("Miguel", "Antunes", "Employee", "DevOps Engineer", 5, null, "Email field must be a valid email."),
+                Arguments.of("Miguel", "Antunes", "Employee", "DevOps Engineer", 5, "", "Email field must be a valid email."),
+                Arguments.of("Miguel", "Antunes", "Employee", "DevOps Engineer", 5, "miguel.isep.ipp.pt", "Email field must be a valid email.")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource ("provideInvalidEmail")
+    void shouldThrowExceptionIfEmailIsInvalid(String firstName, String lastName, String description, String jobTitle, Integer jobYears, String email, String expectedMessage) {
+        // Act + Assert
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            new Employee(firstName, lastName, description, jobTitle, jobYears, email);
         });
         assertEquals(expectedMessage, exception.getMessage());
     }
@@ -109,7 +127,7 @@ class EmployeeTest {
     @Test
     void testEqualsMethod() {
         // Arrange
-        Employee employee1 = new Employee("Miguel", "Antunes", "Employee", "DevOps Engineer", 5);
+        Employee employee1 = new Employee("Miguel", "Antunes", "Employee", "DevOps Engineer", 5, "miguel@gmail.com");
 
         // Act
         String firstName = employee1.getFirstName();
@@ -121,8 +139,8 @@ class EmployeeTest {
     @Test
     void testEqualsMethodIsNotEqual() {
         // Arrange
-        Employee employee1 = new Employee("Miguel", "Antunes", "Employee", "DevOps Engineer", 5);
-        Employee employee2 = new Employee("Eduarda", "Antunes", "Employee", "Marketeer", 0);
+        Employee employee1 = new Employee("Miguel", "Antunes", "Employee", "DevOps Engineer", 5, "miguel@gmail.com");
+        Employee employee2 = new Employee("Eduarda", "Antunes", "Employee", "Marketeer", 0, "miguel@gmail.com");
 
         // Act
         employee1.equals(employee2);
@@ -134,8 +152,8 @@ class EmployeeTest {
     @Test
     void testHashCode() {
         // Arrange
-        Employee employee1 = new Employee("Miguel", "Antunes", "Employee", "DevOps Engineer", 5);
-        Employee employee2 = new Employee("Miguel", "Antunes", "Employee", "DevOps Engineer", 5);
+        Employee employee1 = new Employee("Miguel", "Antunes", "Employee", "DevOps Engineer", 5, "miguel@gmail.com");
+        Employee employee2 = new Employee("Miguel", "Antunes", "Employee", "DevOps Engineer", 5, "miguel@gmail.com");
 
         // Act + Assert
         assertEquals(employee1.hashCode(), employee2.hashCode());
@@ -144,8 +162,8 @@ class EmployeeTest {
     @Test
     void testHashCodeFalse() {
         // Arrange
-        Employee employee1 = new Employee("Miguel", "Antunes", "Employee", "DevOps Engineer", 5);
-        Employee employee2 = new Employee("Eduarda", "Antunes", "Employee", "Marketeer", 0);
+        Employee employee1 = new Employee("Miguel", "Antunes", "Employee", "DevOps Engineer", 5, "miguel@gmail.com");
+        Employee employee2 = new Employee("Eduarda", "Antunes", "Employee", "Marketeer", 0, "miguel@gmail.com");
 
         // Act + Assert
         assertNotEquals(employee1.hashCode(), employee2.hashCode());
@@ -154,7 +172,7 @@ class EmployeeTest {
     @Test
     void testGetIdAndSetId() {
         // Arrange
-        Employee employee = new Employee("Miguel", "Antunes", "Employee", "DevOps Engineer", 5);
+        Employee employee = new Employee("Miguel", "Antunes", "Employee", "DevOps Engineer", 5, "miguel@gmail.com");
 
         // Act
         employee.setId(1L);
@@ -166,7 +184,7 @@ class EmployeeTest {
     @Test
     void testGetFirstNameAndSetFirstName() {
         // Arrange
-        Employee employee = new Employee("Miguel", "Antunes", "Employee", "DevOps Engineer", 5);
+        Employee employee = new Employee("Miguel", "Antunes", "Employee", "DevOps Engineer", 5, "miguel@gmail.com");
 
         // Act
         employee.setFirstName("Filipe");
@@ -177,9 +195,9 @@ class EmployeeTest {
 
     @ParameterizedTest
     @MethodSource ("provideInvalidFirstName")
-    void testInvalidSetFirstName(String firstName, String lastName, String description, String jobTitle, Integer jobYears, String expectedMessage) {
+    void testInvalidSetFirstName(String firstName, String lastName, String description, String jobTitle, Integer jobYears, String email, String expectedMessage) {
         // Arrange
-        Employee employee = new Employee("Miguel", lastName, description, jobTitle, jobYears);
+        Employee employee = new Employee("Miguel", lastName, description, jobTitle, jobYears, email);
 
         // Act + Assert
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
@@ -191,7 +209,7 @@ class EmployeeTest {
     @Test
     void testGetLastNameAndSetLastName() {
         // Arrange
-        Employee employee = new Employee("Miguel", "Antunes", "Employee", "DevOps Engineer", 5);
+        Employee employee = new Employee("Miguel", "Antunes", "Employee", "DevOps Engineer", 5, "miguel@gmail.com");
 
         // Act
         employee.setLastName("Sousa");
@@ -202,9 +220,9 @@ class EmployeeTest {
 
     @ParameterizedTest
     @MethodSource ("provideInvalidLastName")
-    void testInvalidSetLastName(String firstName, String lastName, String description, String jobTitle, Integer jobYears, String expectedMessage) {
+    void testInvalidSetLastName(String firstName, String lastName, String description, String jobTitle, Integer jobYears, String email, String expectedMessage) {
         // Arrange
-        Employee employee = new Employee(firstName, "Antunes", description, jobTitle, jobYears);
+        Employee employee = new Employee(firstName, "Antunes", description, jobTitle, jobYears, email);
 
         // Act + Assert
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
@@ -216,7 +234,7 @@ class EmployeeTest {
     @Test
     void testGetDescriptionAndSetDescription() {
         // Arrange
-        Employee employee = new Employee("Miguel", "Antunes", "Employee", "DevOps Engineer", 5);
+        Employee employee = new Employee("Miguel", "Antunes", "Employee", "DevOps Engineer", 5, "miguel@gmail.com");
 
         // Act
         employee.setDescription("Unemployed");
@@ -227,9 +245,9 @@ class EmployeeTest {
 
     @ParameterizedTest
     @MethodSource ("provideInvalidDescription")
-    void testInvalidSetDescription(String firstName, String lastName, String description, String jobTitle, Integer jobYears, String expectedMessage) {
+    void testInvalidSetDescription(String firstName, String lastName, String description, String jobTitle, Integer jobYears, String email, String expectedMessage) {
         // Arrange
-        Employee employee = new Employee(firstName, lastName, "Employee", jobTitle, jobYears);
+        Employee employee = new Employee(firstName, lastName, "Employee", jobTitle, jobYears, email);
 
         // Act + Assert
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
@@ -241,7 +259,7 @@ class EmployeeTest {
     @Test
     void testGetJobTitleAndSetJobTitle() {
         // Arrange
-        Employee employee = new Employee("Miguel", "Antunes", "Employee", "DevOps Engineer", 5);
+        Employee employee = new Employee("Miguel", "Antunes", "Employee", "DevOps Engineer", 5, "miguel@gmail.com");
 
         // Act
         employee.setJobTitle("Marketeer");
@@ -252,9 +270,9 @@ class EmployeeTest {
 
     @ParameterizedTest
     @MethodSource ("provideInvalidJobTitle")
-    void testInvalidSetJobTitle(String firstName, String lastName, String description, String jobTitle, Integer jobYears, String expectedMessage) {
+    void testInvalidSetJobTitle(String firstName, String lastName, String description, String jobTitle, Integer jobYears, String email, String expectedMessage) {
         // Arrange
-        Employee employee = new Employee(firstName, lastName, description, "DevOps Engineer", jobYears);
+        Employee employee = new Employee(firstName, lastName, description, "DevOps Engineer", jobYears, email);
 
         // Act + Assert
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
@@ -266,7 +284,7 @@ class EmployeeTest {
     @Test
     void testGetJobYearsAndSetJobYears() {
         // Arrange
-        Employee employee = new Employee("Miguel", "Antunes", "Employee", "DevOps Engineer", 5);
+        Employee employee = new Employee("Miguel", "Antunes", "Employee", "DevOps Engineer", 5, "miguel@gmail.com");
 
         // Act
         employee.setJobYears(0);
@@ -277,9 +295,9 @@ class EmployeeTest {
 
     @ParameterizedTest
     @MethodSource ("provideInvalidJobYears")
-    void testInvalidSetJobYears(String firstName, String lastName, String description, String jobTitle, Integer jobYears, String expectedMessage) {
+    void testInvalidSetJobYears(String firstName, String lastName, String description, String jobTitle, Integer jobYears, String email, String expectedMessage) {
         // Arrange
-        Employee employee = new Employee(firstName, lastName, description, jobTitle, 5);
+        Employee employee = new Employee(firstName, lastName, description, jobTitle, 5, "miguel@gmail.com");
 
         // Act + Assert
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
@@ -289,9 +307,34 @@ class EmployeeTest {
     }
 
     @Test
+    void testGetEmailAndSetEmail() {
+        // Arrange
+        Employee employee = new Employee("Miguel", "Antunes", "Employee", "DevOps Engineer", 5, "miguel@gmail.com");
+
+        // Act
+        employee.setEmail("joao@gmail.com");
+
+        // Assert
+        assertEquals("joao@gmail.com", employee.getEmail());
+    }
+
+    @ParameterizedTest
+    @MethodSource ("provideInvalidEmail")
+    void testInvalidSetEmail(String firstName, String lastName, String description, String jobTitle, Integer jobYears, String email, String expectedMessage) {
+        // Arrange
+        Employee employee = new Employee(firstName, lastName, description, jobTitle, 5, "miguel@gmail.com");
+
+        // Act + Assert
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            employee.setEmail(email);
+        });
+        assertEquals(expectedMessage, exception.getMessage());
+    }
+
+    @Test
     public void testToString() {
         // Arrange
-        Employee employee = new Employee("Miguel", "Antunes", "Employee", "DevOps Engineer", 5);
+        Employee employee = new Employee("Miguel", "Antunes", "Employee", "DevOps Engineer", 5, "miguel@gmail.com");
 
         String expected = "Employee{" +
                 "id=" + employee.getId() +
@@ -300,6 +343,7 @@ class EmployeeTest {
                 ", description='" + employee.getDescription() + '\'' +
                 ", jobTitle='" + employee.getJobTitle() + '\'' +
                 ", jobYears='" + employee.getJobYears() + '\'' +
+                ", email='" + employee.getEmail() + '\'' +
                 '}';
         // Act and Assert
         assertEquals(expected, employee.toString());

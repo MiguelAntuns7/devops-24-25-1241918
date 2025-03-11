@@ -34,21 +34,23 @@ public class Employee {
 	private String description;
 	private String jobTitle;
 	private Integer jobYears;
+	private String email;
 
 	protected Employee() {}
 
-	public Employee(String firstName, String lastName, String description, String jobTitle, Integer jobYears) {
+	public Employee(String firstName, String lastName, String description, String jobTitle, Integer jobYears, String email) {
 
-		validateParameters(firstName, lastName, description, jobTitle, jobYears);
+		validateParameters(firstName, lastName, description, jobTitle, jobYears, email);
 
 		setFirstName(firstName);
 		setLastName(lastName);
 		setDescription(description);
 		setJobTitle(jobTitle);
 		setJobYears(jobYears);
+		setEmail(email);
 	}
 
-	public void validateParameters (String firstName, String lastName, String description, String jobTitle, Integer jobYears) {
+	public void validateParameters (String firstName, String lastName, String description, String jobTitle, Integer jobYears, String email) {
 
 		if (firstName == null || firstName.isEmpty())
 			throw new IllegalArgumentException("First Name field must not be empty.");
@@ -64,6 +66,9 @@ public class Employee {
 
 		if (jobYears == null || jobYears < 0)
 			throw new IllegalArgumentException("Job Years field must be a positive value.");
+
+		if (email == null || !email.contains("@"))
+			throw new IllegalArgumentException("Email field must be a valid email.");
 	}
 
 	@Override
@@ -76,13 +81,14 @@ public class Employee {
 				Objects.equals(lastName, employee.lastName) &&
 				Objects.equals(description, employee.description) &&
 				Objects.equals(jobTitle, employee.jobTitle) &&
-				Objects.equals(jobYears, employee.jobYears);
+				Objects.equals(jobYears, employee.jobYears) &&
+				Objects.equals(email, employee.email);
 	}
 
 	@Override
 	public int hashCode() {
 
-		return Objects.hash(id, firstName, lastName, description, jobTitle, jobYears);
+		return Objects.hash(id, firstName, lastName, description, jobTitle, jobYears, email);
 	}
 
 	public Long getId() {
@@ -148,6 +154,17 @@ public class Employee {
 		this.jobYears = jobYears;
 	}
 
+	public String getEmail () {
+		return this.email;
+	}
+
+	public void setEmail (String email) {
+		if (email == null || !email.contains("@"))
+			throw new IllegalArgumentException("Email field must be a valid email.");
+
+		this.email = email;
+	}
+
 	@Override
 	public String toString() {
 		return "Employee{" +
@@ -157,6 +174,7 @@ public class Employee {
 				", description='" + description + '\'' +
 				", jobTitle='" + jobTitle + '\'' +
 				", jobYears='" + jobYears + '\'' +
+				", email='" + email + '\'' +
 				'}';
 	}
 }
