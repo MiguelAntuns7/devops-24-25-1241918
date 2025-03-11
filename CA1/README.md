@@ -224,7 +224,7 @@ After adding the jobYears attribute, I added validations for all Employee class'
 - testInvalidSetJobYears
 - testToString
 
-Afterwards, I ran the application by:
+Afterwards, I **ran the application** by:
 
 1. Changing directory with: ``cd`` until I was inside the basic folder `C:\devops-24-25-1241918\CA1\part1\basic`.
 2. Running the command `.\mvnw spring-boot:run`.
@@ -233,10 +233,19 @@ This would compile the spring-boot application for a few seconds and then have i
 
 3. Meanwhile, I opened my web browser and typed ``localhost:8080`` in order to be redirected to the locally hosted application.
 
+![img.png](img.png)
+
 This allowed me to visualize my changes in the application's interface and debug it through the browser's "Inspect" mode with the help of the "React Developer Tools" extension.
 
+4. With the web application working, after right-clicking anywhere on the web page I accessed the 'Inspect' mode of my web browser in order to, with the help of the React Developer Tools extension, access source code of the web application. I accessed the 'Components' tab on top of the 'Inspect' window, and with Ctrl + P searched for the class "app.js".
 
-Once everything was correctly implemented, it was time to commit my changes. This was done with:
+![img_1.png](img_1.png)
+
+5. Selected 'EmployeeList' component in order to run the debugger.
+
+![img_3.png](img_3.png)
+
+After that, and once everything was correctly implemented, it was time to commit my changes. This was done with:
 
 1. ``git status`` in order to see the files I had changes in.
 
@@ -245,5 +254,7 @@ Once everything was correctly implemented, it was time to commit my changes. Thi
 3. ``git commit -m [commit message]`` to build the commit.
 
 4. ``git push`` to send the commit to my private repository.
+
+5. ``git tag [tag] [HashCode of the commit]`` e.g. : ``git tag v1.4.0 2dc313a``
 
 After doing this, I marked the respective issue with "Done".
