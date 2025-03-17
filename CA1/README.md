@@ -18,6 +18,8 @@ This report documents the work related to the first Class Assignment (CA1) of th
 
 I will be showcasing all the exact steps needed to ensure the project's instructions were followed, both in **Part 1** and in **Part 2**.
 
+# Part 1
+
 ## Development in the Main Branch
 
 I started off by cloning the existing repository of the React and Spring Tutorial, through the IDE's command-line, with the following Git command:
@@ -565,3 +567,9 @@ svn commit -m "Merged email field feature from branch"
 Throughout Part 1 of this Class Assignment, I had the opportunity to dive deeper into Version Control operations using Git. By implementing different features through commiting, branching and merging I was able to improve my Git skills in ways I would not have been able to in other courses.
 I also valued the structured, responsible and linear workflow we were instructed to follow in order to learn the best practices regarding Git.
 The analysis of a different Version Control System was very interesting in the sense that, even though Git and Subversion are different VCS's they have quite a few similar commands, which cements how relevant Git has become in today's market.
+
+
+# Part 2
+
+
+![img_2.png](img_2.png)
