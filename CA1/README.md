@@ -14,7 +14,7 @@
 This report documents the work related to the first Class Assignment (CA1) of the **DevOps** class. This assignment is primarily focused on implementing best practices in **version control systems**, in this case, regarding **Git**. This Class Assignment was divided into **two parts**. In **Part 1** we learned about basic version control without branches, whilst in **Part 2** the concept of _branches_ was introduced in order to handle new features and bug fixes. The culmination of these two parts is discussed in the final section of this report.
 
 
-# Workflow
+## Workflow
 
 I will be showcasing all the exact steps needed to ensure the project's instructions were followed, both in **Part 1** and in **Part 2**.
 
@@ -468,7 +468,7 @@ void testInvalidSetEmail(String firstName, String lastName, String description, 
 
 `` git merge --no-ff fix-invalid-email ``
 
-![img_1.png](img_1.png)
+![img_1.png](Images/img_4.png)
 
 This commit was marked with the tag v1.6.1, considering that the previous email implementation was supposed to have been v1.6.0
 
@@ -562,7 +562,7 @@ svn merge file:///C:/devops-24-25-1241918/branches/email-field
 svn commit -m "Merged email field feature from branch"
 ```
 
-## End of the First Part of the Class Assignment
+## Conclusion of the First Part of the Class Assignment
 
 Throughout Part 1 of this Class Assignment, I had the opportunity to dive deeper into Version Control operations using Git. By implementing different features through commiting, branching and merging I was able to improve my Git skills in ways I would not have been able to in other courses.
 I also valued the structured, responsible and linear workflow we were instructed to follow in order to learn the best practices regarding Git.
@@ -571,5 +571,179 @@ The analysis of a different Version Control System was very interesting in the s
 
 # Part 2
 
+This is a demo application that implements a basic multithreaded chat room server.
+The server supports several simultaneous clients through multithreading.
+When a client connects the server requests a screen name, and keeps requesting a name until a unique one is received.
+After a client submits a unique name, the server acknowledges it. Then all messages from that client will be broadcast to all other clients that have submitted a unique screen name.
+A simple "chat protocol" is used for managing a user's registration/leaving and message broadcast.
 
-![img_2.png](img_2.png)
+### Prerequisites
+
+* Java JDK 8 (or newer)
+* Apache Log4J 2
+* Gradle 7.4.1 (if you do not use the gradle wrapper in the project)
+
+## Workflow
+
+In the beggining of this part 2 of the first Class Assignment, the first step was to download the Gradle Basic Demo repository from BitBucket.
+After having downloaded this repository, the next step was to copy its contents into my own repository.
+I did this through Git's bash with the commands seen in the following print screen: 
+
+![img_2.png](Images/img_5.png)
+
+After doing this, I changed directories until I was inside the folder with all of the application's main folders.
+Then, I compiled the source code and packaged it into an executable .jar file with the following command: ``./gradlew build``.
+
+**Visual representation:**
+
+![img.png](Images/img6.png)
+
+
+### **Server setup:**
+
+**Change** into the root **directory**:
+
+    cd ca1
+    cd part2
+    cd .\pssmatos-gradle_basic_demo-d8cc2d7443c5\
+    cd .\pssmatos-gradle_basic_demo-d8cc2d7443c5\
+
+Open the terminal and execute the following command from inside the project's root directory:
+
+    java -cp build/libs/basic_demo-0.1.0.jar basic_demo.ChatServerApp <server port>
+
+Substitute "<server port>" by a valid por number, e.g. 59001
+
+The terminal will then indicate that the server is actively running:
+
+![img.png](Images/img9.png)
+
+### **Client setup:**
+
+Open another terminal and execute the following gradle task from the project's root directory:
+
+    % ./gradlew runClient
+
+The above task assumes the chat server's IP is "localhost" and its port is "59001". If you whish to use other parameters please edit the runClient task in the "build.gradle" file in the project's root directory.
+
+After running the Client side, the application will ask for a name, which must be unique in the chat room you're entering.
+
+![img.png](Images/img7.png)
+
+To **run multiple clients**, you just need to open more terminals and repeat the invocation of the "runClient" gradle task. You are now ready to message the person in the same chat room as yourself.
+
+![img.png](Images/img8.png)
+
+
+If you wish to leave the chat room simply click on the "X" button in the top right corner and the chat room will indicate that "[user] has left".
+The terminal running the server will indicate which users have left along with the status of the running server:
+
+![img.png](Images/img10.png)
+
+
+To close the server, simply press Ctrl + C (SIGINT) to interrupt the server's running process and press "Y" (Yes) to confirm.
+
+
+## Implementation of new tasks
+
+### Implementation of "runServer" task
+
+In order to improve this project and the initialization of the server, I added a runServer task to the "build.gradle" file. The addition of this task allowed to simply type the gradle command: ``./gradlew runServer`` in the terminal instead of the whole ``java -cp build/libs/basic_demo-0.1.0.jar basic_demo.ChatServerApp <server port>`` command.
+This task was set as type JavaExec in order to execute Java applications. I also specified the task's dependencies as being the classes in order to make sure all the necessary classes for this task will be compiled before the server launches on the specified port '59001'.
+
+```
+task runServer(type: JavaExec, dependsOn: classes) {
+    group = "DevOps"
+    description = "Launches the chat server listening on port 59001."
+
+    classpath = sourceSets.main.runtimeClasspath
+
+    mainClass = 'basic_demo.ChatServerApp'
+
+    args '59001'
+}
+```
+
+In order to test the addition of the functionality, the task was executed with the previously mentioned command: ``./gradlew runServer`` in the terminal.
+I could see the task was running successfully with the terminal's feedback displaying the message that tells me the chat server is running:
+
+![img.png](Images/img11.png)
+
+
+#### Add a unit test
+
+In this segment we will be adding a unit test to cement the App's functions are correctly operating. I created a new directory inside the ``src`` folder: ``test/java/basic_demo/AppTest.java``.
+To ensure the test environment was correctly identifying JUnit tests, I added the following dependency to the dependencies method call inside the "build.grade" file:
+
+`` testImplementation 'junit:junit:4.12' ``
+
+
+I then added the test that verifies if the class "App" returns a greeting that is **not** *null*.
+
+To execute this test and verify that it is running successfully, I ran the gradle command ``./gradlew test``.
+Below we can see the terminal's output when running the previous command:
+
+
+![img.png](Images/img12.png)
+
+
+### Implementation of "backup" task
+
+This new task was supposed to make a backup of the source code, ensuring that there is an available way of recovering any lost files in case that any issues occur during development.
+The "backup" task is declared with Gradle's "Copy" type, in order to replicate the contents inside the "src" folder.
+
+```
+task backup(type: Copy) {
+    group = "DevOps"
+    description = "Copies the sources of the application to a backup folder."
+
+    from 'src'
+    into 'backup'
+}
+```
+
+I ran this task with ``./gradlew backup`` and the following output was returned by the server:
+
+    > Task :backup UP-TO-DATE
+
+    BUILD SUCCESSFUL in 823ms
+    1 actionable task: 1 up-to-date
+
+As it is possible to observe with the following screenshot, a "backup" folder was then created:
+
+![img.png](Images/img13.png)
+
+
+### Implementation of "Zip" task
+
+This new task was intended to make an archive (zip file) where all the contents inside the "src" folder would be inside, compressed.
+This last task involved creating a task of type Zip that would package the project's source code into a compressed .zip file, making it useful for backups and to distribute the project.
+
+``
+task archive(type: Zip) {
+group = "DevOps"
+description = "Creates a zip archive of the source code"
+
+    from 'src'
+    archiveFileName = 'src_backup.zip'
+    destinationDir(file('build'))
+}
+``
+
+I ran this task with ``./gradlew archive`` and the following output was returned by the server:
+
+    > Task :archive
+    BUILD SUCCESSFUL in 1s
+    1 actionable task: 1 executed
+
+The .zip file with the contents of the "src" folder was then created:
+
+![img.png](Images/img14.png)
+
+## Conclusion of the Second Part of the Class Assignment
+
+This second part of the first Class Assignment provided hands-on experience with Gradle, revealing its usefulness as a flexible build automation tool. Working with Gradle's tasks regarding the chat room application was a solid demonstration of its capabilities beyond just compiling code.
+The implementation of custom tasks like the "runServer" significantly streamlined the development workflow. Instead of typing lengthy commands to launch the server, I could simply call the "runServer" task using the previously mentioned command.
+This task automation is one of Gradle's key strengths in the context of DevOps. Creating other tasks like the "backup" and "archive" tasks also highlighted Gradle's utility beyond compilation and testing.
+The nature of Gradle scripts, combined with its task-based architecture, makes it a powerful tool for streamlining development workflows.
+Overall, this part of the Class Assignment helped me broaden my understanding of build tools in the software development world.
