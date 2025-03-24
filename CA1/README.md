@@ -235,17 +235,19 @@ This would compile the spring-boot application for a few seconds and then have i
 
 3. Meanwhile, I opened my web browser and typed ``localhost:8080`` in order to be redirected to the locally hosted application.
 
-![img.png](part1/Images/img.png)
+![img.png](Images/img.png)
 
-This allowed me to visualize my changes in the application's interface and debug it through the browser's "Inspect" mode with the help of the "React Developer Tools" extension.
+This allowed me to visualize my changes in the application's interface.
 
 4. With the web application working, after right-clicking anywhere on the web page I accessed the 'Inspect' mode of my web browser in order to, with the help of the React Developer Tools extension, access source code of the web application. I accessed the 'Components' tab on top of the 'Inspect' window, and with Ctrl + P searched for the class "app.js".
 
-![img_1.png](part1/Images/img_1.png)
+![img.png](Images/img3.png)
 
-5. Selected 'EmployeeList' component in order to run the debugger.
+![img_1.png](Images/img_1.png)
 
-![img_3.png](part1/Images/img_3.png)
+5. Visualize the code and run the debugger.
+
+![img.png](Images/img19.png)
 
 After that, and once everything was correctly implemented, it was time to commit my changes. This was done with:
 
@@ -585,7 +587,7 @@ A simple "chat protocol" is used for managing a user's registration/leaving and 
 
 ## Workflow
 
-In the beggining of this part 2 of the first Class Assignment, the first step was to download the Gradle Basic Demo repository from BitBucket.
+In the beginning of this part 2 of the first Class Assignment, the first step was to download the Gradle Basic Demo repository from BitBucket.
 After having downloaded this repository, the next step was to copy its contents into my own repository.
 I did this through Git's bash with the commands seen in the following print screen: 
 
@@ -624,7 +626,7 @@ Open another terminal and execute the following gradle task from the project's r
 
     % ./gradlew runClient
 
-The above task assumes the chat server's IP is "localhost" and its port is "59001". If you whish to use other parameters please edit the runClient task in the "build.gradle" file in the project's root directory.
+The above task assumes the chat server's IP is "localhost" and its port is "59001". If you whish to use other parameters please edit the runClient task in the ``build.gradle`` file in the project's root directory.
 
 After running the Client side, the application will ask for a name, which must be unique in the chat room you're entering.
 
@@ -648,7 +650,7 @@ To close the server, simply press Ctrl + C (SIGINT) to interrupt the server's ru
 
 ### Implementation of "runServer" task
 
-In order to improve this project and the initialization of the server, I added a runServer task to the "build.gradle" file. The addition of this task allowed to simply type the gradle command: ``./gradlew runServer`` in the terminal instead of the whole ``java -cp build/libs/basic_demo-0.1.0.jar basic_demo.ChatServerApp <server port>`` command.
+In order to improve this project and the initialization of the server, I added a runServer task to the ``build.gradle`` file. The addition of this task allowed to simply type the gradle command: ``./gradlew runServer`` in the terminal instead of the whole ``java -cp build/libs/basic_demo-0.1.0.jar basic_demo.ChatServerApp <server port>`` command.
 This task was set as type JavaExec in order to execute Java applications. I also specified the task's dependencies as being the classes in order to make sure all the necessary classes for this task will be compiled before the server launches on the specified port '59001'.
 
 ```
@@ -747,3 +749,175 @@ The implementation of custom tasks like the "runServer" significantly streamline
 This task automation is one of Gradle's key strengths in the context of DevOps. Creating other tasks like the "backup" and "archive" tasks also highlighted Gradle's utility beyond compilation and testing.
 The nature of Gradle scripts, combined with its task-based architecture, makes it a powerful tool for streamlining development workflows.
 Overall, this part of the Class Assignment helped me broaden my understanding of build tools in the software development world.
+
+
+# Part 3
+
+In this, we will be diving even deeper on Gradle as a build tool. This time, we will be applying what we've already learned on part 1's SpringBoot and React Basic Tutorial.
+Considering part 1's project was set up with Maven, what we'll be doing is we will make the transition to Gradle, while also highlighting Gradle's advantages in a software development process.
+
+## Set Up
+
+We began by creating a new branch where we will be orchestrating this transition from Maven to Gradle. The branch was set up with the command:
+
+``git checkout -b tut-basic-gradle``
+
+Creating a separate branch guarantees we are working in an isolated and manageable environment.
+
+
+Following this, I created a Spring Boot project using the Spring Initializr website (https://start.spring.io/).
+I selected the following dependencies:
+
+- Rest Repositories
+- Thymeleaf
+- JPA
+- H2 database
+
+After setting up the Spring Boot project and obtaining its zip file, I extracted it into my ``CA1/part3`` directory.
+In order to verify the project setup and its available Gradle tasks I executed ``./gradlew tasks``. This provided me a list of all the tasks and functionalities that could be executed in this project using Gradle.
+
+![img.png](Images/img15.png)
+
+![img.png](Images/img16.png)
+
+
+## Copying Part 1 files to Part 3
+
+In this segment we will be importing some of the tutorial's Basic folder's contents from Part 1 into Part 3, the newly created SpringBoot and Gradle project.
+
+### First step - Copying The "src" Folder
+
+First of all, I had to replace my "src" folder with the one from the Basic folder from Part 1.
+Because the generated "src" folder was going to get replaced, I deleted it.
+
+So, through Git's bash, I **changed directory** into my Basic folder from Part 1 and recursively copied the "src" folder to the Part 3 directory with:
+
+    cp -r src "C:\devops-24-25-1241918\CA1\part3\react-and-spring-data-rest-basic"
+
+
+### Second step - Copying Additional Configuration Files
+
+After successfully obtaining the "src" folder from the Basic folder, we want to get the ``webpack.config.js`` and ``package.json`` files from that same folder.
+This was possible by, once again, cd'ing into the Basic folder and copying those configuration files into Part 3's directory:
+
+    cp webpack.config.js "C:\devops-24-25-1241918\CA1\part3\react-and-spring-data-rest-basic"
+    cp package.json "C:\devops-24-25-1241918\CA1\part3\react-and-spring-data-rest-basic"
+
+
+### Third step - Deleting Redundant Folder
+
+Because the Built folder should be generated from javascript by the webpack tool, making this folder redundant, we want to delete it. And so I did with the following set of commands:
+
+    cd ca1
+    cd part3
+    cd react-and-sprint-data-rest-basic
+    cd src
+    cd main
+    cd resources
+    cd static
+    rm -r built
+
+
+After that, a compilation error occurred after importing Part 1's codebase into Part 3, so inside the **Employee** class, in its imports, I had to switch ``javax.persistence`` to ``jakarta.persistence``, aligning it with the Gradle project's dependencies.
+
+After successfully integration of this configuration adjustment, the web application is ready to be ran. After opening the terminal, I typed ``./gradlew bootRun`` which runs the task that boots up the web application, making it locally accessible via any web browser through http://localhost:8080.
+
+![img.png](Images/img17.png)
+
+Accessing the website locally, we notice there is no content in it. It is a blank page with nothing to show for it.
+
+![img.png](Images/img18.png)
+
+This is because the **Gradle setup** is still missing a plugin that allows the web application to recognize its frontend code.
+
+
+## Changes to configuration files
+
+1. In order to add this plugin we must go into the Gradle configuration file ``build.gradle`` and add ``id "org.siouan.frontend-jdk17" version "8.0.0"`` to the plugins block. This plugin was appropriate for the Java version being used in this project. Considering I am using Java 17, it made sense to resort to this plugin which recognizes the Java Development Kit 17 (jdk17).
+
+2. In order to assure the frontend is correctly handled, we also need to add a "frontend" configuration in this same file.
+
+```
+frontend {
+    nodeVersion ="16.20.2"
+    assembleScript ="run build"
+    cleanScript ="run clean"
+    checkScript ="run check"
+}
+```
+
+This addition is essential to properly integrate Node.js based frontend assets with our SpringBoot application.
+Without this configuration the previously added plugin would be lacking the necessary information to use the correct Node.js version and execute the appropriate npm/yarn scripts during the build process.
+
+3. In the `package.json` file, the scripts section was updated to connect Gradle's frontend plugin with the necessary npm commands:
+
+```
+"scripts": {
+    "watch": "webpack --watch -d --output ./target/classes/static/built/bundle.js",
+    "webpack":"webpack",
+    "build":"npm run webpack",
+    "check":"echo Checking frontend",
+    "clean":"echo Cleaning frontend",
+    "lint":"echo Linting frontend",
+    "test":"echo Testing frontend"
+},
+```
+
+These scripts define how webpack should compile frontend assets and provide the commands referenced by the frontend configuration in ``build.gradle``.
+
+
+Afterwards, it was time to test if this Gradle project was being correctly built with the frontend integration. We can do so by running ``./gradlew build``.
+After the previous command "Builds successfully", I ran ``./gradlew bootRun`` to run the Gradle task that runs the SpringBoot web application.
+
+After the web app was running, I opened it locally by typing `localhost:8080` in my web browser.
+This time we could indeed see the table with the Employee class's attributes being shown, showcasing that the frontend was correctly connected with the Gradle environment.
+
+![img.png](Images/img20.png)
+
+
+## Add automation tasks
+
+Taking advantage of Gradle's nature as a build tool, I created a few tasks to make managing files easier.
+
+1. First of all, I created the task ``copyJar`` that would copy the generated .jar file by the ``bootJar`` task to a "dist"ribution folder.
+
+```
+task copyJar (type: Copy) {
+	dependsOn bootJar
+	from bootJar.outputs
+	into file("dist")
+}
+```
+
+2. Secondly, I created the task ``deleteWebpack``. This task has the purpose to delete the files generated by Webpack, who is responsible for the frontend. For me, these files are located in ``src/main/resources/static/build``.
+
+```
+task deleteWebpack (type: Delete) {
+	delete 'src/main/resources/static/built'
+}
+clean.dependsOn deleteWebpack
+```
+
+In this task, I also stated that the ``clean`` task depends on this task, assuring that each time ``clean`` is called, it will also call the ``deleteWebpack`` task.
+
+
+After this, I executed both tasks.
+
+1. Running copyJar
+
+- First of all, I opened the terminal and typed ``./gradlew copyJar``.
+- After that, we can see that the task runs successfully and a new folder "dist" is created with the .jar file inside.
+
+![img.png](Images/img21.png)
+
+![img_1.png](Images/img22.png)
+
+2. Running deleteWebpack
+
+- Executing the task ``./gradlew deleteWebpack``.
+- After that, we can see that the automatically-generated Webpack files got deleted from my working directory. The ``built`` folder inside ``static`` was deleted.
+
+![img.png](Images/img23.png)
+
+![img_1.png](Images/img24.png)
+
