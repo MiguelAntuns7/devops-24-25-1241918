@@ -42,12 +42,12 @@ public class Employee {
 
 		validateParameters(firstName, lastName, description, jobTitle, jobYears, email);
 
-		setFirstName(firstName);
-		setLastName(lastName);
-		setDescription(description);
-		setJobTitle(jobTitle);
-		setJobYears(jobYears);
-		setEmail(email);
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.description = description;
+		this.jobTitle = jobTitle;
+		this.jobYears = jobYears;
+		this.email = email;
 	}
 
 	public void validateParameters (String firstName, String lastName, String description, String jobTitle, Integer jobYears, String email) {
