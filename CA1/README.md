@@ -393,30 +393,30 @@ public void run(String... strings) throws Exception { // <4>
 }
 ```
 
-After the addition of this field, I merged the two branches together by:
+After the addition of this field, I added tha changes to the staging area and built my commit.
+After that, the approach would be to:
 
-- Checking out into the 'main' branch:
+- Check out into the 'main' branch:
 
-``git checkout main``
+``git checkout main`` or ``git switch main``
 
-- And then merging the two branches together:
+- And then merge the two branches together:
 
 ``git merge --no-ff email-field``
 
 After the implementation of this new field, the development of this new feature was done and ready to commited to my remote repository.
-However, in my workflow, I made the mistake of making changes in my branch right after creating it, then commiting my changes inside the branch, and only then pushing the creation of this new branch.
-This led to issues because the branch didn't exist remotely when I pushed my commit, which led to the main branch taking these changes right when I pushed the creation of the branch.
+
+However, in my workflow, I made the mistake of doing ``git merge email-field`` without the ``no fast-forward`` instruction to Git. This made me loose the commit that indicates the merge from the ``email-field`` to the ``main`` branch.
 
 The **correct approach** would have been to:
 
-- Push the creation of new branch as soon as I created it
 - Work on the new branch
 - Commit those changes
 - Checkout into the 'main' branch
 - Merge the email-field branch into the 'main' branch with ``git merge --no-ff email-field``
 - Push the merge into my remote repository with ``git push origin main``
 
-Mistakenly handling the creation and merge of the branch led to me missing a commit regarding the merge, which, consecutively, led to me missing what should have been the tag v1.6.0
+Mistakenly handling the merge of the branch led to me missing a commit regarding the merge, which, consecutively, led to me missing what should have been the tag v1.6.0.
 
 ### New feature for the Email field
 
@@ -921,3 +921,163 @@ After this, I executed both tasks.
 
 ![img_1.png](Images/img24.png)
 
+
+After I ensured both these tasks were running properly, it was time to commit those changes and merge the ``tut-basic-gradle`` branch with the ``main`` branch.
+
+I checked out into the ``main`` branch with:
+
+``git switch main`` or ``git checkout main``
+
+And **merged** the ``tut-basic-gradle`` branch into ``main``:
+
+``git merge --no-ff tut-basic-gradle``
+
+Then I pushed the merge commit with:
+
+``git push origin main``
+
+And lastly, tagged the commit with the respective tag.
+
+
+## Analayzing an Alternative Build Tool: Ant
+
+Apache Ant is one of the oldest and most relevant build automations tools in the Java ecosystem. Ant provides a different approach to build automation compared to Gradle.
+
+1. Ant uses XML-based build files(build.xml), unlike Gradle, which uses Groovy or Kotlin for scripting. This makes Ant more verbose and more dependent on what the user wants in each step of the way. This can also mean more explicitness, which isn't particularly bad.
+
+2. Ant follows an imperative approach where you explicitly define how tasks should be executed. Gradle is more declarative, focusing on what should be done rather than how.
+
+3. Gradle has a well defined build lifecycle with: initialization, configuration and execution phases. Ant has a simpler approach with targets and dependencies between them.
+
+### Build Automation Features
+
+#### Dependency Management
+
+Gradle offers built-in dependency resolution with Maven repository integration and automatic transitive dependency handling. Ant lacks native dependency management, requiring manual dependency handling through explicit file references.
+
+#### Build Configuration
+
+Gradle uses a declarative, concise DSL (Domain Specific Language) with convention-over-configuration principles that simplifies common tasks. Ant, on the other hand, relies on imperative, verbose XML configuration that requires explicit definition in each step of the way.
+
+### Extensions Mechanisms
+
+#### Plugins
+
+Gradle features a rich plugin ecosystem with simple application syntax and a comprehensive API for creating new plugins. Ant extensions come primarily through custom Java task classes or third-party task libraries that would have to be explicitly integrated.
+
+#### Tasks
+
+Gradle allows tasks to be defined directly in build scripts using Groovy/Kotlin or as separate classes with minimal boilerplate. Ant custom tasks require Java classes that extend Ant's Task class, involving more setup and compilation steps.
+
+#### Integration
+
+Gradle provides full access to JVM (Java Virtual Machine) languages with seamless integration to external tools and services. Ant offers more limited scripting support via optional tasks, typically requiring additional configuration to achieve the same level of integration.
+
+
+### Basic Project Setup
+
+Since Ant requires explicit configuration of the project structure and classpath, first we would need to create the ``build.xml`` file in order to set up the necessary dependencies and tasks for the SpringBoot project. The required libraries for SpringBoot (like spring-boot-starter-data-jpa, spring-boot-starter-thymeleaf, etc.) need to be added to the ``build.xml``:
+The ``build.xml`` file would be the now-called ``build.gradle``.
+
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="spring-data-rest-and-reactjs" default="build" basedir=".">
+    <property name="src.dir" location="src/main/java"/>
+    <property name="resources.dir" location="src/main/resources"/>
+    <property name="build.dir" location="build"/>
+    <property name="dist.dir" location="dist"/>
+    <property name="static.dir" location="${resources.dir}/static"/>
+    <property name="built.dir" location="${static.dir}/built"/>
+    <property name="node.version" value="16.20.2"/>
+    <property name="lib.dir" location="lib"/>
+    
+    <property name="spring-boot.version" value="3.4.3"/>
+    <property name="h2.version" value="2.2.224"/>
+    
+    <path id="compile.classpath">
+        <fileset dir="${lib.dir}">
+            <include name="**/*.jar"/>
+        </fileset>
+    </path>
+    
+    <target name="init">
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${dist.dir}"/>
+        <mkdir dir="${lib.dir}"/>
+    </target>
+    
+    <target name="resolve-dependencies" depends="init">
+        <get src="https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-data-jpa/${spring-boot.version}/spring-boot-starter-data-jpa-${spring-boot.version}.jar" 
+             dest="${lib.dir}" skipexisting="true"/>
+        <get src="https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-data-rest/${spring-boot.version}/spring-boot-starter-data-rest-${spring-boot.version}.jar" 
+             dest="${lib.dir}" skipexisting="true"/>
+        <get src="https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-thymeleaf/${spring-boot.version}/spring-boot-starter-thymeleaf-${spring-boot.version}.jar" 
+             dest="${lib.dir}" skipexisting="true"/>
+        <get src="https://repo.maven.apache.org/maven2/com/h2database/h2/${h2.version}/h2-${h2.version}.jar" 
+             dest="${lib.dir}" skipexisting="true"/>
+    </target>
+</project>
+```
+
+Our current frontend Siouan frontend plugin ``id "org.siouan.frontend-jdk17" version "8.0.0"`` handles Node.js installation automatically if not present, while Ant requires custom setup for different platforms.
+To handle **only** the frontend build equivalent to the frontend plugin in our ``gradle.build``:
+
+```
+<target name="npm-install" depends="setup-node">
+    <exec executable="npm" dir="${basedir}" failonerror="true">
+        <arg value="install"/>
+    </exec>
+</target>
+
+<target name="frontend-build" depends="npm-install">
+    <exec executable="npm" dir="${basedir}" failonerror="true">
+        <arg value="run"/>
+        <arg value="build"/>
+    </exec>
+</target>
+
+<target name="frontend-clean">
+    <exec executable="npm" dir="${basedir}" failonerror="true">
+        <arg value="run"/>
+        <arg value="clean"/>
+    </exec>
+</target>
+
+<target name="frontend-check">
+    <exec executable="npm" dir="${basedir}" failonerror="true">
+        <arg value="run"/>
+        <arg value="check"/>
+    </exec>
+</target>
+```
+
+These frontend build tasks mirror the scripts present in our current ``package.json file``.
+
+### Custom-Built Tasks:
+
+**copyJar:**
+
+```
+<target name="copy-jar-to-dist" depends="package">
+    <copy todir="${dist.dir}">
+        <fileset dir="${build.dir}/libs" includes="*.jar"/>
+    </copy>
+</target>
+```
+
+**deleteWebpack:**
+
+```
+<target name="delete-webpack">
+    <delete dir="${built.dir}"/>
+</target>
+```
+
+Gradle provides a more modern, concise approach with built-in dependency management and a more elaborate plugin system that simplifies SpringBoot and frontend integration for this project. Ant offers complete control through XML configuration but requires more setup for the same functionalities.
+For the tutorial web application, Gradle's syntax, functionalities and easier maintenance revealed themselves more useful to this scenario compared to Ant's more verbose characteristics. This analysis showcases why modern Java applications typically go for Gradle in between the two Build Tools.
+
+# Conclusion of the Third Part of the Class Assignment
+
+Converting the tutorial application from Maven to Gradle perfectly demonstrated the practical advantages of modern build tools in today's Java development.
+I deepened my knowledge regarding Gradle's core concepts. The addition of custom tasks like JAR distribution and webpack cleanup also highlighted the Gradle's more streamlined approach to dependencies and build automation compared to Maven's XML approach.
+The analysis of Ant vs Gradle as build automation tools also helped me deepen my understanding regarding different build tools outside of those tackled both in this project and in class.
