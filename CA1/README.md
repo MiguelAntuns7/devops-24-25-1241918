@@ -564,6 +564,10 @@ svn merge file:///C:/devops-24-25-1241918/branches/email-field
 svn commit -m "Merged email field feature from branch"
 ```
 
+### Visual Representation of the changes
+
+![img.png](Images/img25.png)
+
 ## Conclusion of the First Part of the Class Assignment
 
 Throughout Part 1 of this Class Assignment, I had the opportunity to dive deeper into Version Control operations using Git. By implementing different features through commiting, branching and merging I was able to improve my Git skills in ways I would not have been able to in other courses.
@@ -1079,5 +1083,5 @@ For the tutorial web application, Gradle's syntax, functionalities and easier ma
 # Conclusion of the Third Part of the Class Assignment
 
 Converting the tutorial application from Maven to Gradle perfectly demonstrated the practical advantages of modern build tools in today's Java development.
-I deepened my knowledge regarding Gradle's core concepts. The addition of custom tasks like JAR distribution and webpack cleanup also highlighted the Gradle's more streamlined approach to dependencies and build automation compared to Maven's XML approach.
+This deepened my knowledge regarding Gradle's core concepts. The addition of custom tasks like ``JAR distribution`` and ``webpack cleanup`` also highlighted Gradle's more streamlined approach to dependencies and build automation compared to Maven's XML approach.
 The analysis of Ant vs Gradle as build automation tools also helped me deepen my understanding regarding different build tools outside of those tackled both in this project and in class.
