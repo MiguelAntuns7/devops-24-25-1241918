@@ -2,7 +2,6 @@
 # for information about machine names on private network
   Vagrant.configure("2") do |config|
    config.ssh.forward_agent= true
-  end
 
   # This provision is common for both VMs
   config.vm.provision "shell", inline: <<-SHELL
