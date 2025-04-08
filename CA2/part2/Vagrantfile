@@ -64,7 +64,7 @@
       # uncomment tomcat-users and add manager-gui to tomcat user
 
       # Change the following command to clone your own repository!
-      git clone https://github.com/MiguelAntuns7/devops-24-25-1241918.git
+      git clone git@github.com:MiguelAntuns7/devops-24-25-1241918.git
       cd devops-24-25-1241918/CA1/part3/react-and-spring-data-rest-basic
       chmod u+x gradlew
       ./gradlew clean build
