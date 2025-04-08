@@ -116,7 +116,7 @@ In this section I will be showcasing the Class Assignment 1's projects running i
 
 One of the first tasks inside the VM was to run the Sprint Boot tutorial project developed in the previous assignment. The aim was to verify that the VM's Java environment could properly support a Maven-based Sprint Boot web application.
 
-I started by cd'ing into the project's ``basic`` folder inside CA1 - part1, which contains the Spring Boot source code along with the Maven wrapper script.
+I started by _cd'ing_ into the project's ``basic`` folder inside CA1 - part1, which contains the Spring Boot source code along with the Maven wrapper script.
 
 To run the application, I used the provided Maven wrapper. When already inside the basic folder, run ``./mvnw spring-boot:run`` to have the web application running locally.
 
@@ -144,10 +144,49 @@ Gradle property is invalid.
 
 This was confusing at first, because I ran into no issues when running the project through IntelliJ in my physical machine.
 
+First, I did ``readlink -f $(which java)`` in order to see the real path of the current Java version being used under the hood. It confirmed to me that the system was using Java 23.
+
 After inspecting the project setup, I discovered that the file ``gradle.properties`` was explicitly setting the Java home path to a Windows location, which in Linux obviously isn't possible. To ensure the Virtual Machine was pointing to the correct Java version, I:
 
-- Edited the ``gradle.properties`` file to comment out the invalid Windows path:
+- Did ``sudo update-alternatives --config java`` to list all the available Java versions the system had. I switched from Java 23 to 17.
+
+- With ``nano`` as the text editor, I edited the ``gradle.properties`` file to comment out the invalid Windows path:
 
 ```
 # org.gradle.java.home=C:/Users/Miguel/.jdks/corretto-17.0.14
 ```
+
+This removed the hardcoded Java path in the project's configuration.
+
+After these adjustments, I ran ``./gradlew runServer`` and the server launched successfully, confirming that the VM was now using Java 17 and that Gradle was no longer pointing to the wrong version.
+
+![img.png](ImagesCA2/img5.png)
+
+This was useful in understanding how configuration files influence build tools like Gradle with the previously handled ``gradle.properties`` file.
+
+Considering the project is now ready to be executed, and the server is already running in my guest machine, I opened Windows Powershell, navigated into CA1/part2's root directory and ran the client-side on my Host machine with ``./gradlew runClient --args="192.168.56.5 59001"``.
+This allowed the client on my physical machine to communicate with the server running in the VM by specifying the VM's IP address and respective port number.
+
+The chat app was then working as expected:
+
+![img.png](ImagesCA2/img4.png)
+
+
+### Executing the Gradle-versioned Spring-Boot and React Web App
+
+In this part, I showcase how it was possible to run the Gradle version of the Spring Boot application.
+
+1. I navigated into ``devops-24-25-1241918/CA1/part3/react-and-spring-data-rest-basic``.
+
+2. Did ``./gradlew build`` to build the Part 3 project, and ran the web app with ``./gradlew bootRun``.
+
+Once the server was running in the VM, and just like the Maven version of the web app, I simply accessed it locally in http://192.168.56.5:8080/.
+
+
+## Conclusion of Part 1
+
+This report covered the setup and use of a virtual machine to execute the previously developed Java-based projects in a controlled environment. The process included configuring network access, secure file transfer, and installing development tools required for building and running Spring Boot and Gradle applications.
+
+While running the Gradle chat app, I ran into an issue with Java versions. Even though I had Java 17 installed, the VM was still defaulting to Java 23, and Gradle was picking up the wrong path. Fixing this taught me how Gradle pulls configuration from both the system and the project's configuration files.
+
+Overall, this assignment gave me practical experience with virtualization and environment management, both of which are extremely important DevOps skills in today's world.
