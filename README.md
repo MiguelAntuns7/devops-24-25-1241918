@@ -1,2 +1,2 @@
 # AssignmentsDevOps
-Repository for my DevOps class's assigments
+Repository for my DevOps class's assignments
