@@ -23,6 +23,8 @@
     db.vm.network "forwarded_port", guest: 8082, host: 8082
     db.vm.network "forwarded_port", guest: 9092, host: 9092
 
+    db.vm.provider "virtualbox"
+
     # We need to download H2
     db.vm.provision "shell", inline: <<-SHELL
       wget https://repo1.maven.org/maven2/com/h2database/h2/1.4.200/h2-1.4.200.jar
@@ -45,7 +47,11 @@
     web.vm.hostname = "web"
     web.vm.network "private_network", ip: "192.168.56.10"
 
-    # We set more ram memmory for this VM
+    # Copy SSH keys to the VM
+    web.vm.provision "file", source: "~/.ssh/id_ed25519", destination: "~/.ssh/id_ed25519"
+    web.vm.provision "file", source: "~/.ssh/id_ed25519.pub", destination: "~/.ssh/id_ed25519.pub"
+
+    # We set more ram memory for this VM
     web.vm.provider "virtualbox" do |v|
       v.memory = 1024
     end
@@ -54,14 +60,26 @@
     web.vm.network "forwarded_port", guest: 8080, host: 8080
 
     web.vm.provision "shell", inline: <<-SHELL, privileged: false
-      # sudo apt-get install git -y
-      # sudo apt-get install nodejs -y
-      # sudo apt-get install npm -y
-      # sudo ln -s /usr/bin/nodejs /usr/bin/node
+      # Set proper permissions on the SSH key
+      chmod 600 ~/.ssh/id_ed25519
+
+      # Rest of your provisioning script...
       sudo apt install -y tomcat9 tomcat9-admin
-      # If you want to access Tomcat admin web page do the following:
-      # Edit /etc/tomcat9/tomcat-users.xml
-      # uncomment tomcat-users and add manager-gui to tomcat user
+
+      if [ -e ~/.ssh/known_hosts ]; then
+        echo "### Known Hosts exist"
+          if [ ! -n "$(grep "^github.com " ~/.ssh/known_hosts)" ]; then
+                echo "### Adding Key"
+                ssh-keyscan github.com >> ~/.ssh/known_hosts 2>/dev/null
+          fi
+      else
+            echo "### Known Hosts missing!!!"
+            ssh-keyscan github.com >> ~/.ssh/known_hosts 2>/dev/null
+      fi
+      echo "### sleeping 2 seconds"
+      sleep 2
+      echo "### done"
+      ssh -T git@github.com
 
       # Change the following command to clone your own repository!
       git clone git@github.com:MiguelAntuns7/devops-24-25-1241918.git
