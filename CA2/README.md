@@ -1,14 +1,15 @@
 # Class Assignment 2
 
+## Part 1
+
 ### Introduction
 
 This technical report outlines the procedures and results of Class Assignment 2 – Part 1, which focused on virtualization. The main goal was to gain practical experience in setting up and managing virtual environments, which is a fundamental skill for modern development and operations workflows.
 
 The report details the creation and configuration of a virtual machine running Ubuntu, the setup of a Java-based development environment, and the execution of the projects previously developed in the last assignment. Emphasis is placed on the challenges faced during environment setup and how those were overcome inside the VM.
 
-In addition to completing the required setup steps, particular attention was given to diagnosing and resolving environment-specific issues, which is an inevitable part of real-world DevOps workflows. This included dealing with version mismatches, build configuration errors, and Operative System differences between host and guest environments. By overcoming these obstacles, I gained valuable insight into the practical challenges of environment replication and consistency, which are essential for achieving reliability and portability across development, testing, and deployment pipelines.
+In addition to completing the required setup steps, particular attention was given to diagnosing and resolving environment-specific issues, which is an inevitable part of real-world DevOps workflows. This included dealing with version mismatches, build configuration errors, and Operative System differences between host and guest environments. By overcoming these obstacles, I gained valuable insight into the practical challenges of environment replication and consistency, which are essential for achieving reliability across development, testing, and deployment pipelines.
 
-## Part 1
 
 ## Creating a VM
 
@@ -190,3 +191,282 @@ This report covered the setup and use of a virtual machine to execute the previo
 While running the Gradle chat app, I ran into an issue with Java versions. Even though I had Java 17 installed, the VM was still defaulting to Java 23, and Gradle was picking up the wrong path. Fixing this taught me how Gradle pulls configuration from both the system and the project's configuration files.
 
 Overall, this assignment gave me practical experience with virtualization and environment management, both of which are extremely important DevOps skills in today's world.
+
+
+
+## Part 2
+
+### Introduction
+
+This section of the technical documentation covers the implementation and configuration of a virtualized environment using Vagrant. The primary objective was to establish a development environment that closely mimics production settings by creating a multi-machine setup with Spring Boot and H2 database components.
+
+The assignment required configuring virtual machines to host a Spring Boot application connected to an H2 database, ensuring proper network configuration for seamless communication between components. This approach demonstrates practical application of DevOps principles by enabling consistent, reproducible development environments.
+
+
+### Setup
+
+First of all, I had to install Vagrant. I accessed [Vagrant's official website](https://www.vagrantup.com/downloads) and downloaded the Windows AMD64 version.
+
+After that, I opened my Windows Powershell terminal and typed ``vagrant --version`` to verify if Vagrant was properly installed on my machine.
+
+### Trying out Vagrant
+
+In order to wet my feet with Vagrant, I downloaded [my professor's repository](https://bitbucket.org/pssmatos/vagrant-multi-spring-tut-demo/src/master/) on BitBucket.
+
+I had always been using VMware as my Hypervisor, and that was the provider Vagrant was recognizing.
+But, for some reason, Vagrant was not letting me work with VMware properly, demanding some sort of license key. So I was forced to install VirtualBox. I accessed https://www.virtualbox.org/wiki/Downloads and downloaded the most recent version to my Windows machine.
+
+Now, with the help of the Windows Powershell, and after downloading, I _cd'd_ into the root directory containing the VagrantFile, written in Ruby, opened my terminal and typed ``vagrant up``.
+This command, following the instructions written inside the VagrantFile, orders Vagrant to initialize two Virtual Machines. One for the ``web`` application and another for the ``database``.
+
+Once both VMs were up, you could access them through the following URLs:
+http://localhost:8080/basic-0.0.1-SNAPSHOT/
+http://localhost:8080/basic-0.0.1-SNAPSHOT/h2-console
+
+
+### Setup CA1 Project
+
+In this part, I will elaborate on how I adapted Vagrant to my own ``CA1/part3`` project.
+
+The first step was to copy my professor's ``vagrant file`` to my own ``CA2/part2`` directory.
+After having done that, the vagrant file was customized in order to function with my **CA1** project.
+
+#### First Steps:
+
+1. I changed the GitHub URL to clone my own private remote repository
+2. With the ``cd`` (change directory) command, I added the instruction for the script to, after cloning, go into the root directory of my ``CA1/part3`` project.
+3. Afterward, I added the ``./gradlew bootRun`` task, in order to run the SpringBoot application.
+
+```
+# Change the following command to clone your own repository!
+git clone git@github.com:MiguelAntuns7/devops-24-25-1241918.git
+cd devops-24-25-1241918/CA1/part3/react-and-spring-data-rest-basic
+chmod u+x gradlew
+./gradlew clean build
+./gradlew bootRun
+# To deploy the war file to tomcat9 do the following command:
+sudo cp ./build/libs/basic-0.0.1-SNAPSHOT.jar /var/lib/tomcat9/webapps
+```
+
+4. Enabled SSH Agent Forwarding in order to allow to Virtual Machine to use the SSH credentials (that were created later on) from the host machine.
+
+``config.ssh.forward_agent= true``
+
+5. I also added a command to the script that automatically makes the VM add GitHub.com to the list of known SSH Hosts.
+
+```
+if [ -e ~/.ssh/known_hosts ]; then
+        echo "### Known Hosts exist"
+          if [ ! -n "$(grep "^github.com " ~/.ssh/known_hosts)" ]; then
+                echo "### Adding Key"
+                ssh-keyscan github.com >> ~/.ssh/known_hosts 2>/dev/null
+          fi
+      else
+            echo "### Known Hosts missing!!!"
+            ssh-keyscan github.com >> ~/.ssh/known_hosts 2>/dev/null
+      fi
+      echo "### sleeping 2 seconds"
+      sleep 2
+      echo "### done"
+      ssh -T git@github.com
+```
+
+
+#### SSH Authentication Setup
+
+Because this DevOps project's instructions were for our remote repository to be private from the start, scripting vagrant file so that the VM clones it requires authentication.
+But, obviously, the whole idea of this Vagrant process is to automate things. So there was the need to resolve this authentication "issue" without manual user intervention.
+
+This was done using ``SSH agent forwarding``, which lets the Virtual Machine access the SSH key directly from the Host Machine.
+
+1. Created an SSH key on my Host machine.
+
+2. Added the key to my GitHub account's SSH credentials.
+
+3. Started the SSH agent:
+
+``eval "$(ssh-agent -s)"``
+
+4. Added my SSH key to the agent:
+
+``ssh-add ~/.ssh/id_ed25519``
+
+
+#### My full Vagrant File
+
+```
+# See: https://manski.net/2016/09/vagrant-multi-machine-tutorial/
+# for information about machine names on private network
+  Vagrant.configure("2") do |config|
+   config.ssh.forward_agent= true
+
+  # This provision is common for both VMs
+  config.vm.provision "shell", inline: <<-SHELL
+    sudo apt-get update -y
+    sudo apt-get install -y iputils-ping avahi-daemon libnss-mdns unzip \
+        openjdk-17-jdk-headless
+    # ifconfig
+  SHELL
+
+  #============
+  # Configurations specific to the database VM
+  config.vm.define "db" do |db|
+    db.vm.box = "ubuntu/bionic64"
+    db.vm.hostname = "db"
+    db.vm.network "private_network", ip: "192.168.56.11"
+
+    # We want to access H2 console from the host using port 8082
+    # We want to connet to the H2 server using port 9092
+    db.vm.network "forwarded_port", guest: 8082, host: 8082
+    db.vm.network "forwarded_port", guest: 9092, host: 9092
+
+    db.vm.provider "virtualbox"
+
+    # We need to download H2
+    db.vm.provision "shell", inline: <<-SHELL
+      wget https://repo1.maven.org/maven2/com/h2database/h2/1.4.200/h2-1.4.200.jar
+    SHELL
+
+    # The following provision shell will run ALWAYS so that we can execute the H2 server process
+    # This could be done in a different way, for instance, setiing H2 as as service, like in the following link:
+    # How to setup java as a service in ubuntu: http://www.jcgonzalez.com/ubuntu-16-java-service-wrapper-example
+    #
+    # To connect to H2 use: jdbc:h2:tcp://192.168.33.11:9092/./jpadb
+    db.vm.provision "shell", :run => 'always', inline: <<-SHELL
+      java -cp ./h2*.jar org.h2.tools.Server -web -webAllowOthers -tcp -tcpAllowOthers -ifNotExists > ~/out.txt &
+    SHELL
+  end
+
+  #============
+  # Configurations specific to the webserver VM
+  config.vm.define "web" do |web|
+    web.vm.box = "ubuntu/bionic64"
+    web.vm.hostname = "web"
+    web.vm.network "private_network", ip: "192.168.56.10"
+
+    # Copy SSH keys to the VM
+    web.vm.provision "file", source: "~/.ssh/id_ed25519", destination: "~/.ssh/id_ed25519"
+    web.vm.provision "file", source: "~/.ssh/id_ed25519.pub", destination: "~/.ssh/id_ed25519.pub"
+
+    # We set more ram memory for this VM
+    web.vm.provider "virtualbox" do |v|
+      v.memory = 1024
+    end
+
+    # We want to access tomcat from the host using port 8080
+    web.vm.network "forwarded_port", guest: 8080, host: 8080
+
+    web.vm.provision "shell", inline: <<-SHELL, privileged: false
+      # Set proper permissions on the SSH key
+      chmod 600 ~/.ssh/id_ed25519
+
+      # Rest of your provisioning script...
+      sudo apt install -y tomcat9 tomcat9-admin
+
+      if [ -e ~/.ssh/known_hosts ]; then
+        echo "### Known Hosts exist"
+          if [ ! -n "$(grep "^github.com " ~/.ssh/known_hosts)" ]; then
+                echo "### Adding Key"
+                ssh-keyscan github.com >> ~/.ssh/known_hosts 2>/dev/null
+          fi
+      else
+            echo "### Known Hosts missing!!!"
+            ssh-keyscan github.com >> ~/.ssh/known_hosts 2>/dev/null
+      fi
+      echo "### sleeping 2 seconds"
+      sleep 2
+      echo "### done"
+      ssh -T git@github.com
+
+      # Change the following command to clone your own repository!
+      git clone git@github.com:MiguelAntuns7/devops-24-25-1241918.git
+      cd devops-24-25-1241918/CA1/part3/react-and-spring-data-rest-basic
+      chmod u+x gradlew
+      ./gradlew clean build
+      ./gradlew bootRun
+      # To deploy the war file to tomcat9 do the following command:
+      sudo cp ./build/libs/basic-0.0.1-SNAPSHOT.war /var/lib/tomcat9/webapps
+    SHELL
+  end
+end
+```
+
+#### My full Spring Boot configuration
+
+1. Application Properties file
+
+```
+server.servlet.context-path=/basic-0.0.1-SNAPSHOT
+spring.data.rest.base-path=/api
+spring.datasource.url=jdbc:h2:tcp://192.168.56.11:9092/./jpadb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=
+spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+spring.h2.console.enabled=true
+spring.h2.console.path=/h2-console
+spring.h2.console.settings.web-allow-others=true
+```
+
+2. App.js file
+
+```
+componentDidMount() { // <2>
+    client({method: 'GET', path: '/basic-0.0.1-SNAPSHOT/api/employees'}).done(response => {
+        this.setState({employees: response.entity._embedded.employees});
+    });
+}
+```
+
+
+#### Executing the Application
+
+To start everything up, I did a ``vagrant status`` to verify if everything was fine and ready to be executed.
+After that, I simply opened my Git Bash through IntelliJ, and did ``vagrant up``.
+
+Once everything is running, you can access:
+
+- The Spring Boot application at http://localhost:8080/basic-0.0.1-SNAPSHOT/
+- The H2 database console at http://localhost:8082/
+  
+For the **H2 console**, I inserted this URL in the connection details:
+
+**JDBC URL:** jdbc:h2:tcp://192.168.56.11:9092/./jpadb
+
+![img.png](ImagesCA2/img6.png)
+
+After accessing the H2 DataBase console, it was possible to then write in the text box any query that we wanted regarding the Spring Boot project, such as ``SELECT * FROM Employee``
+
+![img.png](ImagesCA2/img7.png)
+
+
+#### Analysing an Alternative - VMware
+
+Since VMware (both Workstation and Fusion) is now free, you could access [VMware's official website](https://www.vmware.com/products/desktop-hypervisor/workstation-and-fusion) in order to download either of these versions.
+
+After that, install the Vagrant VMware Utility (a bridge between Vagrant and VMware) through [HashiCorp's official website](https://developer.hashicorp.com/vagrant/docs/providers/vmware/vagrant-vmware-utility).
+
+Then, you would have to purchase and install the Vagrant VMware plugin with ``vagrant plugin install vagrant-vmware-desktop``.
+
+Now, regarding the VagrantFile script:
+
+I have set up my VagrantFile to specifically use VirtualBox as the provider because it was recognizing VMware, for some reason.
+But, actually, Vagrant works with VirtualBox by default, which would make it mandatory for you to tell Vagrant to use VMware as the provided Hypervisor.
+
+Instead of having ``[NameOfTheVM].vm.provider "virtualbox"`` in the script, it should be ``[NameOfTheVM].vm.provider "vmware_desktop"`` 
+
+Either that, or you can simply run ``vagrant up`` with the ``--provider`` flag and the ``=vmware_desktop`` specification right after.
+
+``vagrant up --provider=vmware_desktop``
+
+
+### Conclusion of Part 2
+
+This project successfully implemented a virtualized development environment using Vagrant, with a Spring Boot application connected to an H2 database.
+The automation provided by Vagrant ensures a consistent and reproducible setup, which is essential for DevOps practices.
+
+The key challenges of this part of the second Class Assignment were mostly directed towards having the configuration files (VagrantFile, application properties, etc) correctly set-up so that the script would work correctly.
+
+I appreciated the way it was possible to simply, in a matter of seconds, create and/or destroy Virtual Machine/s.
+It also touches a little bit on the "it works on my machine" problem. Although that sentence is more related to Docker, which we will be touching on later in this Class Assignment, there is some emphasys to be made on the fact that **anyone** with this Vagrant File can run the exact same setup I'm using.
+
