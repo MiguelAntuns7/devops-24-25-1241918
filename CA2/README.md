@@ -532,10 +532,11 @@ EXPOSE 59001
 ENTRYPOINT ["java", "-cp", "/app/basic_demo-0.1.0.jar", "basic_demo.ChatServerApp", "59001"]
 ```
 
-This Dockerfile dictates the Container's behaviour by using a multi-stage build to keep the final image lightweight. At a first instance, it clones the chat app repository and runs the server-side.
+This Dockerfile dictates the Container's behaviour by using a multi-stage build to keep the final image lightweight. It clones the chat app repository from my professor's BitBucket and runs the server-side.
 
 Having the Dockerfile set-up, we can build the Docker Image with: ``docker build -t <Your_Docker_Username>/chat-server:[Tag_For_This_Image] .`` .
 The ``-t`` tag is used to tag the image with a name and a version. In my case it was marked as ``docker build -t MiguelAntuns/chat-server:version1 .``
+The `` . `` specifies the build context. In other words, the directory Docker should use when looking for the Dockerfile.
 
 Afterwards, you can check if the image was properly created with ``docker images``. This command will show you all the images associated to your Docker account, as shown below:
 
@@ -563,3 +564,70 @@ This might seem like it created another Image, but truthfully it just creates an
 Once re-tagged, I was able to successfully push the Image to Docker Hub with ``docker push MiguelAntuns/chat-server:version1``.
 
 ![img.png](ImagesCA2/img12.png)
+
+We can also check this through Docker Desktop, by searching for the __name of the Image__ in the DockerHub tab on the sidebar.
+Either that or by selecting ``DockerHub repositories`` in the ``Images`` tab on the sidebar.
+
+![img.png](ImagesCA2/img13.png)
+
+
+### Version 2 : Accessing the chat app through local files
+
+Once again, you should create another subfolder inside the part3, this time for Version 2.
+You will create a Dockerfile, and this time the intent is to dictate the behaviour of the Container so that it accesses the CA1/part2 in order to run the server side.
+
+``My Version 2 Dockerfile:``
+
+```
+FROM gradle:jdk21 AS builder
+
+# creates this directory in the docker image
+WORKDIR /app
+
+# copy the part2 chat app from my host machine to the docker image
+COPY CA1/part2/pssmatos-gradle_basic_demo-d8cc2d7443c5/pssmatos-gradle_basic_demo-d8cc2d7443c5/build/libs/basic_demo-0.1.0.jar /app/basic_demo-0.1.0.jar
+
+EXPOSE 59001
+
+ENTRYPOINT ["java", "-cp", "/app/basic_demo-0.1.0.jar", "basic_demo.ChatServerApp", "59001"]
+```
+
+1. Again, I built the Docker Image, this time with the following command:
+
+``docker build -t miguelantuns/chat-server:version2 .``
+
+This time I was more careful with the name I gave my Image, making sure there were no capitalized letters.
+Also, now the tag of this Image is __version2__.
+
+2. Now run the Image. I did it with:
+
+``docker run -p 59001:59001 miguelantuns/chat-server:version2``
+
+![img.png](ImagesCA2/img14.png)
+
+Additionally, you may run ``docker images`` in order to make sure the Image was properly built.
+
+![img.png](ImagesCA2/img15.png)
+
+3. Then, I pushed the Image to DockerHub using:
+
+``docker push miguelantuns/chat-server:version2``
+
+![img.png](ImagesCA2/img16.png)
+
+If you prefer a more GUI-friendly proof that the Image is now remotely on DockerHub, you can check it on DockerDesktop by:
+
+- Going in the DockerHub tab and typing the name of the Image.
+![img.png](ImagesCA2/img17.png)
+
+- Going on the ``Images`` tab on the sidebar and selecting ``DockerHub repositories``. You will be able to see which of your Images is remote on DockerHub.
+![img.png](ImagesCA2/img18.png)
+
+  
+### Conclusion of Part 3
+
+In this part of the assignment, I successfully containerized the chat server application using two distinct Docker approaches. One with a full build inside the Container (multi-stage build) and another by copying the pre-built JAR from the host.
+
+Both these approaches illustrated how Docker plays a crucial role in providing isolated ways to deploy applications.
+
+By setting up Docker, writing the Dockerfile, running into the naming issue with the Image, running the Container and finally pushing to DockerHub, I gained hands-on experience with containerization concepts and deepened my understanding of Docker's role in modern DevOps.
