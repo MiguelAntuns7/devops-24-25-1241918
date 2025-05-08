@@ -214,7 +214,7 @@ After that, I opened my Windows Powershell terminal and typed ``vagrant --versio
 In order to wet my feet with Vagrant, I downloaded [my professor's repository](https://bitbucket.org/pssmatos/vagrant-multi-spring-tut-demo/src/master/) on BitBucket.
 
 I had always been using VMware as my Hypervisor, and that was the provider Vagrant was recognizing.
-But, for some reason, Vagrant was not letting me work with VMware properly, demanding some sort of license key. So I was forced to install VirtualBox. I accessed https://www.virtualbox.org/wiki/Downloads and downloaded the most recent version to my Windows machine.
+But, for some reason, Vagrant was not letting me work with VMware properly, demanding some sort of license key. So I was forced to install VirtualBox. I accessed [VirtualBox's official website](https://www.virtualbox.org/wiki/Downloads) and downloaded the most recent version to my Windows machine.
 
 Now, with the help of the Windows Powershell, and after downloading, I _cd'd_ into the root directory containing the VagrantFile, written in Ruby, opened my terminal and typed ``vagrant up``.
 This command, following the instructions written inside the VagrantFile, orders Vagrant to initialize two Virtual Machines. One for the ``web`` application and another for the ``database``.
@@ -429,7 +429,7 @@ Once everything is running, you can access:
 - The Spring Boot application at http://localhost:8080/basic-0.0.1-SNAPSHOT/
 - The H2 database console at http://localhost:8082/
   
-For the **H2 console**, I inserted this URL in the connection details:
+For the **H2 console**, you should insert this URL in the connection details:
 
 **JDBC URL:** jdbc:h2:tcp://192.168.56.11:9092/./jpadb
 
@@ -470,3 +470,96 @@ The key challenges of this part of the second Class Assignment were mostly direc
 I appreciated the way it was possible to simply, in a matter of seconds, create and/or destroy Virtual Machine/s.
 It also touches a little bit on the "it works on my machine" problem. Although that sentence is more related to Docker, which we will be touching on later in this Class Assignment, there is some emphasys to be made on the fact that **anyone** with this Vagrant File can run the exact same setup I'm using.
 
+
+
+## Part 3
+
+The goal of this part3 of the Class Assignment 2 was to containerize the chat server application using Docker, exploring two approaches to building and deploying that same application.
+
+This report documents the implementation of the two versions of the Docker solution:
+
+- Version 1: The chat server is built entirely inside the Dockerfile using a multi-stage process.
+- Version 2: The chat server is built on the host machine, and the resulting JAR file is copied into the Docker image.
+
+Both versions were tested by running the chat application in a container and connecting to it using multiple Clients. The images were then pushed to the Docker Hub.
+The following sections provide a step-by-step guide to reproducing the assignment including the setup, Dockerfile configurations, build and run commands, etc.
+
+### Setup
+
+Before doing anything, we'll need to install Docker on our machine. 
+Because Docker (Linux) containers need a Linux kernel in order to virtualize on the OS layer, we'll need either ``WSL-2`` or ``Hyper-V``.
+
+``WSL-2`` is usually the best option considering it is a fast and lightweight solution compared to a fully fledged Hypervisor like Hyper-V.
+It also uses Hyper-V under the hood without having to actually install it.
+
+After having the WSL (Windows Subsystem for Linux) installed, you can install Docker through [Docker's official website](https://www.docker.com/products/docker-desktop/).
+After having Docker Desktop installed, you should create an account.
+
+When the setup of Docker is done. You should open your terminal and do a ``docker login``. If you are logged-in on Docker Desktop, the terminal should return the following message:
+
+![img.png](ImagesCA2/img8.png)
+
+### Version 1 : Cloning through the DockerFile
+
+After having done the setup properly, you should create a folder for the Version 1. You can create it with the ``mkdir`` command.
+
+Subsequently, you should create a Dockerfile that will build a Docker Image, which consecutively generates a Container.
+A container is essentially an isolated environment with everything you need to run an application.
+
+
+``My Dockerfile:``
+
+```
+FROM gradle:jdk17 AS builder
+
+WORKDIR /CA2/part3/version1
+
+# Clone the gradle basic demo BitBucket repository
+RUN git clone https://bitbucket.org/pssmatos/gradle_basic_demo.git
+
+WORKDIR /CA2/part3/version1/gradle_basic_demo
+
+RUN chmod +x gradlew && ./gradlew build --no-daemon
+
+FROM eclipse-temurin:17-jre
+
+WORKDIR /app
+
+COPY --from=builder /CA2/part3/version1/gradle_basic_demo/build/libs/basic_demo-0.1.0.jar /app/basic_demo-0.1.0.jar
+
+EXPOSE 59001
+
+ENTRYPOINT ["java", "-cp", "/app/basic_demo-0.1.0.jar", "basic_demo.ChatServerApp", "59001"]
+```
+
+This Dockerfile dictates the Container's behaviour by using a multi-stage build to keep the final image lightweight. At a first instance, it clones the chat app repository and runs the server-side.
+
+Having the Dockerfile set-up, we can build the Docker Image with: ``docker build -t <Your_Docker_Username>/chat-server:[Tag_For_This_Image] .`` .
+The ``-t`` tag is used to tag the image with a name and a version. In my case it was marked as ``docker build -t MiguelAntuns/chat-server:version1 .``
+
+Afterwards, you can check if the image was properly created with ``docker images``. This command will show you all the images associated to your Docker account, as shown below:
+
+![img.png](ImagesCA2/img9.png)
+
+
+Considering the Docker Image was already created, I ran the Container with ``docker run -p 59001:59001 MiguelAntuns/chat-server:version1``.
+Then, I got the message that the server was running and I opened up two more tabs on the terminal and changed directory into my CA1/part2 in order to run the ``runClient`` task, that boots up the client-side.
+
+![img.png](ImagesCA2/img10.png)
+
+I was then free to chat between users.
+
+![img.png](ImagesCA2/img11.png)
+
+After ensuring the Container hosted the server-side of the chat app and connecting to it through my host machine, it was time to push this Docker Image to DockerHub, the remote Docker Images repository.
+
+This could be accomplished through running the command ``docker push MiguelAntuns/chat-server:version1``.
+But I ran into an issue. Docker doesn't allow Docker Images to have capital letters, which my Docker Image did.
+
+To fix this, I had to rename it to only have lowercase letters by doing: ``docker tag MiguelAntuns/chat-server:version1 miguelantuns/chat-server:version1``.
+
+This might seem like it created another Image, but truthfully it just creates another reference to that same image, as it is observable through the ``Image ID`` tab when running ``Docker Images``.
+
+Once re-tagged, I was able to successfully push the Image to Docker Hub with ``docker push MiguelAntuns/chat-server:version1``.
+
+![img.png](ImagesCA2/img12.png)
