@@ -17,10 +17,7 @@ package com.greglturnquist.payroll;
 
 import java.util.Objects;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 /**
  * @author Greg Turnquist
@@ -30,7 +27,8 @@ import jakarta.persistence.Id;
 public class Employee {
 
 	@Id
-	@GeneratedValue (strategy = GenerationType.IDENTITY)
+	@SequenceGenerator(name = "employee_seq", sequenceName = "employee_seq", allocationSize = 1)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "employee_seq")
 	private Long id; // <2>
 	private String firstName;
 	private String lastName;
