@@ -19,6 +19,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.Statement;
+
 /**
  * @author Greg Turnquist
  */
@@ -27,14 +32,22 @@ import org.springframework.stereotype.Component;
 public class DatabaseLoader implements CommandLineRunner { // <2>
 
 	private final EmployeeRepository repository;
+	private DataSource dataSource;
 
 	@Autowired // <3>
-	public DatabaseLoader(EmployeeRepository repository) {
+	public DatabaseLoader(EmployeeRepository repository, DataSource dataSource) {
 		this.repository = repository;
+		this.dataSource = dataSource;
 	}
 
 	@Override
-	public void run(String... strings) throws Exception { // <4>
+	public void run(String... args) throws Exception {
+		try (Connection conn = dataSource.getConnection();
+			 Statement statement = conn.createStatement()) {
+
+			statement.execute("CREATE SEQUENCE IF NOT EXISTS employee_seq START 1 INCREMENT 1;");
+		}
+
 		this.repository.save(new Employee("Frodo", "Baggins", "ring bearer", "DevOps Engineer", 2, "miguel@gmail.com"));
 	}
 }
