@@ -1,5 +1,37 @@
 # Class Assignment 2
 
+### Part 1: Virtual Machine Setup
+1. [Introduction](#introduction)
+2. [Creating a VM](#creating-a-vm)
+3. [Network Settings and Configurations](#network-settings-and-configurations)
+4. [Cloning my private repository](#cloning-my-private-repository)
+5. [Set Up Development Environment](#set-up-development-environment)
+6. [Executing the repository's projects](#executing-the-repositorys-projects)
+    - [Spring-Boot and React Web App](#executing-the-spring-boot-and-react-web-app)
+    - [Gradle Chat App](#executing-the-gradle-chat-app)
+    - [Gradle-versioned Spring-Boot](#executing-the-gradle-versioned-spring-boot-and-react-web-app)
+7. [Conclusion](#conclusion-of-part-1)
+
+### Part 2: Vagrant Implementation
+1. [Introduction](#introduction-1)
+2. [Setup](#setup)
+3. [Trying out Vagrant](#trying-out-vagrant)
+4. [Setup CA1 Project](#setup-ca1-project)
+    - [First Steps](#first-steps)
+    - [SSH Authentication](#ssh-authentication-setup)
+    - [Vagrant File](#my-full-vagrant-file)
+    - [Spring Boot Config](#my-full-spring-boot-configuration)
+5. [Executing the Application](#executing-the-application)
+6. [VMware Alternative](#analysing-an-alternative---vmware)
+7. [Conclusion](#conclusion-of-part-2)
+
+### Part 3: Docker Containerization
+1. [Introduction](#introduction-2)
+2. [Setup](#setup-1)
+3. [Version 1: Docker Build](#version-1--cloning-through-the-dockerfile)
+4. [Version 2: Local Files](#version-2--accessing-the-chat-app-through-local-files)
+5. [Conclusion](#conclusion-of-part-3)
+
 ## Part 1
 
 ### Introduction
@@ -474,6 +506,8 @@ It also touches a little bit on the "it works on my machine" problem. Although t
 
 ## Part 3
 
+### Introduction
+
 The goal of this part3 of the Class Assignment 2 was to containerize the chat server application using Docker, exploring two approaches to building and deploying that same application.
 
 This report documents the implementation of the two versions of the Docker solution:
@@ -631,3 +665,105 @@ In this part of the assignment, I successfully containerized the chat server app
 Both these approaches illustrated how Docker plays a crucial role in providing isolated ways to deploy applications.
 
 By setting up Docker, writing the Dockerfile, running into the naming issue with the Image, running the Container and finally pushing to DockerHub, I gained hands-on experience with containerization concepts and deepened my understanding of Docker's role in modern DevOps.
+
+
+## Part 4
+
+### Introduction
+
+This part of the assignment focuses on containerizing the Spring Boot web application and respective H2 database using Docker.
+The aim is to replicate the deployment setup from the previous Part 2, but using Docker instead of Vagrant, and to ensure that the system can be brought up using `docker-compose`.
+
+The report details the creation of Dockerfiles for both the Web Application and the Database, the use of a `docker-compose.yml` file to orchestrate both services, and the steps to push these images to Docker Hub. A volume is also configured to extract the database file from within the container.
+
+### Database Container
+
+The Database service uses the H2 server in a standalone mode. The Dockerfile for this service is located in the `database` subfolder.
+
+``My Database Dockerfile:``
+
+```
+# Base image with a lightweight Java 11 Runtime, ideal for deployment scenarios
+FROM openjdk:11-jre-slim
+
+# Install only required packages (wget) and clean up to minimize image size
+RUN apt-get update \
+    && apt-get install -y wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# Define the working directory inside the container
+WORKDIR /usr/src/app
+
+# Fetch the H2 database JAR from the central Maven repository
+RUN wget https://repo1.maven.org/maven2/com/h2database/h2/1.4.200/h2-1.4.200.jar
+
+# Open ports for the H2 web console (8082) and TCP client connections (9092)
+EXPOSE 9092 8082
+
+# Start the H2 server with web and TCP modes active, allowing connections and auto-creating databases as needed
+CMD ["java", "-cp", "./h2-1.4.200.jar", "org.h2.tools.Server", \
+     "-tcp", "-tcpAllowOthers", "-ifNotExists", \
+     "-web", "-webAllowOthers"]
+```
+
+1. The database container is based on a lightweight OpenJDK 11 runtime image (openjdk:11-jre-slim). This keeps the image lean while still capable of running the H2 server.
+
+2. Everything is placed under ``/usr/src/app``, which isolates app files from system paths.
+
+3. Port exposure:
+- ``8082``: for the web-based H2 Console.
+- ``9092``: for external TCP access (useful when connecting from the app container).
+
+4. Startup command: The H2 server is started with flags to:
+Enable TCP connections from external containers (-tcpAllowOthers)
+Enable the browser-based console (-webAllowOthers)
+Avoid reinitializing the database if files already exist (-ifNotExists)
+
+
+### Web Application Container
+
+``My Web App Dockerfile:``
+
+```
+# Use a minimal JDK 17 base image, well-suited for Java app builds
+FROM openjdk:17-jdk-slim
+
+# Refresh package index, install Git for cloning, then clean up to reduce image size
+RUN apt-get update \
+    && apt-get install -y git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Define the container's working directory
+WORKDIR /usr/src/app
+
+# Clone the application repository into the container
+RUN git clone https://github.com/MiguelAntuns7/devops-24-25-1241918.git .
+
+# Navigate to the specific Spring Boot project folder
+WORKDIR /usr/src/app/CA1/part3/react-and-spring-data-rest-basic
+
+# Ensure Gradle wrapper is executable and build the project JAR
+RUN chmod +x gradlew \
+    && ./gradlew clean bootJar
+
+# Make port 8080 available for external access
+EXPOSE 8080
+
+# Launch the Spring Boot application using the generated JAR
+CMD ["java", "-jar", "build/libs/react-and-spring-data-rest-basic-0.0.1-SNAPSHOT.jar"]
+```
+
+1. The web container is built on top of a slim Java 17 base image (openjdk:17-jdk-slim), which is compatible with modern Spring Boot versions.
+
+2. Set to ``/usr/src/app``, where the repository is cloned.
+
+3. After cloning, the build navigates to the specific subpath where the Spring Boot project resides: CA1/part3/react-and-spring-data-rest-basic
+
+4. Build step:
+``gradlew`` is made executable.
+The project is built using ``./gradlew clean bootJar``, producing a runnable JAR.
+
+5. Exposes port 8080, which is the default for Spring Boot.
+
+6. Runs the .jar using java -jar, avoiding Tomcat (because Spring Boot includes an embedded server)
+
